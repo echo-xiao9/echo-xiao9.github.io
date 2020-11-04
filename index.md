@@ -1,4 +1,6 @@
-## Welcome to GitHub Pages
+## Welcome to My Pages
+
+here is Kang Yixiao's personal page for do something.
 
 You can use the [editor on GitHub](https://github.com/echo-xiao9/echo-xiao9.github.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
 
