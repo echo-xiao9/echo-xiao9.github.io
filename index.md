@@ -3,6 +3,7 @@
 here is Kang Yixiao's personal page for do something.
 
 You can use the [editor on GitHub](https://github.com/echo-xiao9/echo-xiao9.github.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
+this is my [first new page](https://echo-xiao9.github.io/myfirstNewPage/) to maintain and preview the content for your website in Markdown files.
 
 Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
