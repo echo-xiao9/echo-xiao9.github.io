@@ -1,6 +1,7 @@
-## Welcome to My Pages
+## Yixiao Kang
+### PROGAMMING BLOG
 
-here is Kang Yixiao's personal page.
+
 
 You can use the [editor on GitHub](https://github.com/echo-xiao9/echo-xiao9.github.io/edit/main/index.md) to maintain and preview the content for your website in Markdown files.
 this is my [first new page](https://echo-xiao9.github.io/myfirstNewPage/) to maintain and preview the content for your website in Markdown files.
