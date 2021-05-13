@@ -5,8 +5,8 @@ description: "主流算法资料整理"
 modified: 2021-05-13
 tags: [sample post]
 image:
-  path: /images/SLAM/pipe.png
-  feature: pipe
+  path: /images/abstract-10.jpg
+  feature: abstract-10.jpg
   credit: dargadgetz
   creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
