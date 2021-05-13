@@ -1,7 +1,7 @@
 ---
 layout: post
-title: ORB-SLAM
-description: "Just about everything you'll need to style in the theme: headings, paragraphs, blockquotes, tables, code blocks, and more."
+title: loop closure 回环检测算法综述
+description: "主流算法资料整理"
 modified: 2021-05-13
 tags: [sample post]
 image:
@@ -10,118 +10,76 @@ image:
   credit: dargadgetz
   creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
 ---
+# 回环检测
 
-## 参考：
-[https://zhuanlan.zhihu.com/p/47451004](https://zhuanlan.zhihu.com/p/47451004)
+## 发展历程
 
-[https://www.cnblogs.com/luyb/p/5215168.html](https://www.cnblogs.com/luyb/p/5215168.html)
+1. 词袋模型（Bag Of Words,BOW) : DBOW → DBOW2 →DBOW3 →FBOW
+2. 随机蕨法（Random ferns）
+3. 基于深度学习的方法
+   1. 有监督的方法 Places365
+   2. 无监督的方法 CALC原理
 
-Semantic Simultaneous Localization and Mapping for Augmented Reality
+## 词袋模型
 
-语义同步定位和映射增强现实
+### 步骤
 
-<figure>
-  <img src="/images/SLAM/Untitled.png" alt="ORB-SLAM流程图">
-</figure>
+1.提取特征
 
-ORB-SLAM是一种基于ORB特征的三维定位与地图构建算法（SLAM）[1]。
+2.构建字典（所有单词的集合)
 
-## 三大线程
+[https://mmbiz.qpic.cn/mmbiz_png/rqpicxXx8cNmKmBibtct2ZF6qUPZ97swJ2PNV1iaUwlSz6egmGmoXkFq7FHtUu4Cic01OUeCZibGRM3jFftoPBfUFDg/640?wx_fmt=gif&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1](https://mmbiz.qpic.cn/mmbiz_png/rqpicxXx8cNmKmBibtct2ZF6qUPZ97swJ2PNV1iaUwlSz6egmGmoXkFq7FHtUu4Cic01OUeCZibGRM3jFftoPBfUFDg/640?wx_fmt=gif&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 
-ORB-SLAM利用三个线程分别进行追踪、地图构建和闭环检测。
+3.确定一帧中具有哪些单词，形成词袋向量 (1表示具有该单词，0表示没有)
 
-<figure>
-  <img src="/images/SLAM/pipe.png" alt="ORB-SLAM流程图">
-</figure>
+[https://mmbiz.qpic.cn/mmbiz_png/rqpicxXx8cNmKmBibtct2ZF6qUPZ97swJ2icEXibV2mBefLma4INBMQZgxcIS1uLrWXWXDWFEiap9ibvvseftznSoDoA/640?wx_fmt=gif&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1](https://mmbiz.qpic.cn/mmbiz_png/rqpicxXx8cNmKmBibtct2ZF6qUPZ97swJ2icEXibV2mBefLma4INBMQZgxcIS1uLrWXWXDWFEiap9ibvvseftznSoDoA/640?wx_fmt=gif&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1)
 
-### 一、追踪
+4.比较两帧描述向量的差异。
 
-1. ORB特征提取
-2. 初始姿态估计（速度估计）
-3. 姿态优化（Track local map，利用邻近的地图点寻找更多的特征匹配，优化姿态）
-4. 选取关键帧
+### 缺陷
 
-### 二、地图构建
+并不完全精确，会出现假阳性数据。在回环检测检索的后期阶段需要用其他方法加以验证。如果当前跟踪已经完全丢失，需要重定位给出当前帧的位姿来调整。
 
-1. 加入关键帧（更新各种图）
-2. 验证最近加入的地图点（去除Outlier）
-3. 生成新的地图点（三角法）
-4. 局部Bundle adjustment（该关键帧和邻近关键帧，去除Outlier）
-5. 验证关键帧（去除重复帧）
+## 随机蕨法（Random ferns）
 
-### 三、闭环检测
+思路：相机的每一帧压缩编码，并且有效的对不同帧之间相似性进行评估。
 
-1. 选取相似帧（bag of words）
-2. 检测闭环（计算相似变换（3D<->3D，存在尺度漂移，因此是相似变换），RANSAC计算内点数）
-3. 融合三维点，更新各种图
-4. 图优化（传导变换矩阵），更新地图所有点
+步骤：
 
-## 追踪
+1. 输入一个RGB-D图片，在图像的随机位置评估简单的二进制测试，将整个帧进行编码，形成编码块，每个fern产生一小块编码，并且编码连接起来可以表达一个紧凑的相机帧。
+2. 每一个编码块指向一个编码表的一行，和具有等效的编码、存储着关键帧id的fern关联起来，编码表以哈希表的形式存储。
+3. 当不断采集新的图片时，如果不相似性大于阈值，新进来的帧的id将会被添加到行中。在跟踪恢复的时候，从哈希表中检索姿态，将最相似的关键帧关联起来。
 
-### 初始追踪（Init pose estimation）
+### 代码
 
-1. Tracking with motion model
+Random Fern在VSLAM中的应用
 
-假设物体处于匀速运动，那么可以用上一帧的位姿和速度来估计当前帧的位姿。这个模型适用于运动速度和方向比较一致，没有大转动的情形下，比如匀速运动的汽车、机器人、人等。而对于运动比较随意的目标，当然就会失效了。此时就要用到下面两个模型。
+kinect fusion
 
-2. Tracking with reference key frame
+https://github.com/Nerei/kinfu_remake
 
-计算当前帧对应的词向量量，⽤用词向量量去查 询数据库，找到⼏几个候选关键帧执⾏定位操作，PnP算法[14]计算当前帧的相对位姿，如果我们针对该关键帧找到 ⾜足够多的有效地图点。
+elastic fusion
 
-视觉词向量量是特征描述⼦空间特征的一种离散表述，⽽字典是由所有的视觉词向量量构成，这⾥里里的视觉字典不不是SLAM进⾏行行的时候创建 的，⽽而是事先离线创建的。我们事先从⼤大量量的图像中提取出ORB特征构建⼀一个视 觉字典，故我们可以通过词向量量查询对应的关键 帧，这样使得查询效率⽐比较⾼高。
+https://github.com/mp3guy/ElasticFusion
 
-3. 姿态优化（Track local map）
+PTAM
 
-我们就会最⼩化投影误差再⼀一次优化位姿，随后继续跟 踪接下来的其他帧。
+https://github.com/Oxford-PTAM/PTAM-GPL
 
-### 更新局部地图（Local mapping thread）
+## 基于深度学习的方法
 
-<figure>
-  <img src="/images/SLAM/2020-12-06_8.15.51.png" alt="更新局部地图">
-</figure>
+神经网络直接从图像中得到6自由度的相机位姿。相较于传统的视觉定位方法，省去了复杂的图像匹配过程，并且不需要对相机位姿进行迭代求解，但是输入图像必须在训练场景中。
 
+### 有监督的方法
 
-## 回环检测（loop closure）
+place365
 
-回环检测在大尺度地图构建上是一个非常有用的方法。回环检测可以从二维图像出发，也可以从三维点云出发。
+源码地址：[https://github.com/CSAILVision/places365](https://github.com/CSAILVision/places365)
 
-BoW（bag of words，词袋模型)
+### 无监督的方法
 
-如果是ORB特征，那就是ORB词典；如果是SIFT特征，那就是SIFT词典。词典可以从图像数据集中训练出来。
+### CALC原理
 
-在实际应用中，每一幅图像都在词典中搜索其最近邻的单词，并在该单词下留下标记。如果A、B两幅图像定位到同一个单词时，说明这两幅图像有可能有相似的特征点。当A、B有一定量的相似点时，可以认为这两幅图像之间存在着一定的相似性。
+该方法创建了一个自动编码结构，可以有效的解决边界定位错误。对于一个位置进行拍摄，在不同时间时，由于视角变化、光照、气候、动态目标变化等因素，会导致定位不准。卷积神经网络可以有效地进行基于视觉的分类任务。
 
-优势：
-
-1. 从每幅图像中提取特征点和特征描述；特征描述一般是一个多维向量，因此可以计算两个特征描述之间的距离；
-2. 将这些特征描述进行聚类（比如k－means），类别的个数就是词典的单词数，比如1000；也可以用Beyes、SVM等；
-3. DBoW2将这个词典组织成树的形式，方便搜索。
-
-4. 词典可以离线训练。在实时应用中能离线的东西越多越好。作者提供了通过大量数据训练出来的BRIEF和SIFT的词典。
-5. 搜索速度飞快。小尺寸的图像可以在毫秒级别完成。作者提供了正向（direct index）和反向（inverse index）两种辅助指标。反向指标在节点（单词）上储存到达这个节点的图像特征的权重信息和图像编号，因此可用于快速寻找相似图像。正向指标则储存每幅图像上的特征以及其对应的节点在词典树上的某一层父节点的位置，因此可用于快速特征点匹配（只需要匹配该父节点下面的单词）。
-6. //很多slam应用本身就需要计算特征点和描述，因此可以用特征来搜索。
-7. //ORB－SLAM的作者还用词典的特性做快速的特征筛选，减少特征匹配需要的时间（特别是在大尺度上搜索特征时）。
-
-**回环融合（fusion）**
-
-这里有一个隐含假设，即误差随着时间不断累积，相对而言，我们更信任之前的信息而不是当前的信息。这部分主要是把回环帧的信息融合到当前帧里面，包括匹配的特征点对应的三维信息（深度、尺度等），世界坐标系下的位姿（通过Sim3的结果转化过去）等等。融合也包括回环帧的邻域和当前帧的邻域。
-
-## 性能
-
-ORB－SLAM的优点：
-
-1. Tracking的平均时间约为20ms每帧，基本可以达到实时追踪（i5－5200，2.2GHz）。
-2. 丢帧以后回到原来的场景，很容易就可以找回来。
-3. 定位的稳定性较好，姿态流畅，没有跳变。
-4. 在简单背景下，可以有效地追踪目标物体。
-
-ORB－SLAM的缺点：
-
-1. 旋转时比较容易丢帧，特别是pure rotation。
-2. 地图中的点云很稀疏，完全不能看出任何结构。
-3. 加载地图需要一定时间（10秒左右，通过二进制词典可以加速，DBoW2的作
-4. 者似乎是为了兼容性放弃了二进制）。
-5. 初始化时最好保持低速运动，对准特征和几何纹理丰富的物体。
-6. 作者为了增强系统的鲁棒性，在很多地方采用了多重判断，引入了N多参数。不同场景下的应用可能需要花一些时间理解和调整这些参数。
-
-简言之，对于地图密度要求不高的定位和追踪问题，ORB－SLAM是个不错的选择。
+源码地址：[https://github.com/rpng/calc](https://github.com/rpng/calc)
