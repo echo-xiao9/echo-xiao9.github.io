@@ -5,7 +5,7 @@ description: "Just about everything you'll need to style in the theme: headings,
 modified: 2021-05-13
 tags: [sample post]
 image:
-  path: /images/abstract-10.jpg
+  path: /images/SLAM/pipe.png
   feature: pipe
   credit: dargadgetz
   creditlink: http://www.dargadgetz.com/ios-7-abstract-wallpaper-pack-for-iphone-5-and-ipod-touch-retina/
