@@ -11,7 +11,8 @@ url:
 owner:
   name:           Yixiao Kang
   avatar:         avatar.jpg
-  bio:            Shanghai Jiao Tong University Software Engineering
+  bio:            Shanghai Jiao Tong University 
+                  Software Engineering
   email:          819601193@email.com
   # Social networking links used in footer. Update and remove as you like.
   twitter:        
@@ -19,7 +20,7 @@ owner:
   github:         https://github.com/echo-xiao9
   stackexchange:  
   linkedin:       
-  instagram:      
+  instagram:      https://space.bilibili.com/499540439
   flickr:         
   tumblr:         
   # google plus id, include the '+', eg +mmistakes
